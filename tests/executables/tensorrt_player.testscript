@@ -1,0 +1,6 @@
+: smoke
+:
+# tensorrt_player takes -h, not --help, which it reads as a missing json file
+# argument and exits 255.
+#
+$* -h >! 2>!

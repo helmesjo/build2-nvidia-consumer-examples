@@ -1,0 +1,47 @@
+# One testscript per exported executable, each running the imported target
+# itself. The flags differ per tool, so each has its own script.
+#
+import nvcc            = cuda-nvcc%exe{nvcc}
+import bin2c           = cuda-nvcc%exe{bin2c}
+import cudafe          = cuda-nvcc%exe{cudafe++}
+import fatbinary       = cuda-nvcc%exe{fatbinary}
+import nvlink          = cuda-nvcc%exe{nvlink}
+import ptxas           = cuda-nvcc%exe{ptxas}
+import device_query    = cuda-nvcc%exe{__nvcc_device_query}
+import cicc            = libnvvm%exe{cicc}
+import trtexec         = libtensorrt%exe{trtexec}
+import tensorrt_player = libtensorrt%exe{tensorrt_player}
+
+# test says what to run and the ./: prerequisite keeps it up to date. Both
+# carry @./ because these scripts do not use the reserved testscript name,
+# and without it the target is looked for in the out tree.
+#
+testscript{nvcc}@./:            test = $nvcc
+testscript{bin2c}@./:           test = $bin2c
+testscript{cudafe}@./:          test = $cudafe
+testscript{fatbinary}@./:       test = $fatbinary
+testscript{nvlink}@./:          test = $nvlink
+testscript{ptxas}@./:           test = $ptxas
+testscript{device_query}@./:    test = $device_query
+testscript{cicc}@./:            test = $cicc
+testscript{trtexec}@./:         test = $trtexec
+testscript{tensorrt_player}@./: test = $tensorrt_player
+
+./: testscript{nvcc}@./         $nvcc
+./: testscript{bin2c}@./        $bin2c
+./: testscript{cudafe}@./       $cudafe
+./: testscript{fatbinary}@./    $fatbinary
+./: testscript{nvlink}@./       $nvlink
+./: testscript{ptxas}@./        $ptxas
+./: testscript{device_query}@./ $device_query
+./: testscript{cicc}@./         $cicc
+./: testscript{trtexec}@./      $trtexec
+
+# tensorrt_player is built on Linux only. The declaration stays in the graph
+# on both platforms so the script still reaches the distribution, and the
+# alias carries the condition: a prerequisite-specific variable on an
+# out-qualified prerequisite would also apply to the preceding one.
+#
+alias{linux-only}: testscript{tensorrt_player}@./ $tensorrt_player
+
+./: alias{linux-only}: include = ($cxx.target.class != 'windows')

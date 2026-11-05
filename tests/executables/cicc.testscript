@@ -1,0 +1,6 @@
+: smoke
+:
+# cicc has no --help that exits 0: it still demands an input file. Running it
+# is the closest deterministic no-op proving it was installed and runs.
+#
+$* --help >! 2>! != 0
