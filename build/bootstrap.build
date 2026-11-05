@@ -1,0 +1,7 @@
+project = nvidia-consumer-examples
+
+using version
+using config
+using test
+using install
+using dist
