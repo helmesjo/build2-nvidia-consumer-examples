@@ -2,12 +2,29 @@
 name: nvidia-consumer-examples
 version: 0.1.0-a.0.z
 language: c++
-summary: nvidia-consumer-examples C++ executable
+summary: examples using every nvidia-cuda-toolkit and nvidia-tensorrt target
 license: MIT ; MIT License.
 description-file: README.md
-url: https://example.org/nvidia-consumer-examples
-email: helmesjo@gmail.com
-#build-error-email: helmesjo@gmail.com
+url: https://github.com/build2-packaging/nvidia-consumer-examples
+email: packaging@build2.org
+
+# The examples link a GPU-only stack and pull in several gigabytes of
+# pre-built archives, neither of which a build bot can provide.
+#
+builds: none
+
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
-#depends: libhello ^1.0.0
+
+# The revision is part of the constraint. 13.3.1+3 cannot be installed from a
+# bpkg configuration, and 13.3.1+2 declares only ./: libs{} for each library,
+# so importing lib{} against it fails to find a rule.
+#
+depends: cuda-cccl ^13.3.1+4
+depends: cuda-crt ^13.3.1+4
+depends: cuda-cudart ^13.3.1+4
+depends: cuda-nvcc ^13.3.1+4
+depends: cuda-nvrtc ^13.3.1+4
+depends: libcublas ^13.3.1+4
+depends: libnvvm ^13.3.1+4
+depends: libtensorrt ^10.16.1+3
