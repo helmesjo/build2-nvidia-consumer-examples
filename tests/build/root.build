@@ -1,0 +1,19 @@
+cxx.std = latest
+
+using cxx
+
+hxx{*}: extension = hxx
+ixx{*}: extension = ixx
+txx{*}: extension = txx
+cxx{*}: extension = cxx
+
+# The test target for cross-testing (running tests under Wine, etc).
+#
+test.target = $cxx.target
+
+# cuda-cccl's preprocessor.h hard-errors under MSVC's traditional
+# preprocessor. The package cannot export this itself, so every MSVC consumer
+# of cuda-cccl has to add it.
+#
+if ($cxx.target.class == 'windows')
+  cxx.coptions += /Zc:preprocessor

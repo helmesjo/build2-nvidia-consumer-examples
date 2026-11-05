@@ -1,0 +1,54 @@
+# One executable per exported library, each linking exactly that library, so
+# a failure names the library that broke. nvinfer, nvinfer_lean,
+# nvinfer_dispatch and tensorrt_shim export the same entry points and could
+# not share a link line in any case.
+#
+# lib{}, not libs{}: cudart and cudadevrt are static on Windows.
+#
+import cccl              = cuda-cccl%lib{cccl}
+import crt               = cuda-crt%lib{crt}
+import cudadevrt         = cuda-cudart%lib{cudadevrt}
+import cudart            = cuda-cudart%lib{cudart}
+import nvcc              = cuda-nvcc%lib{nvcc}
+import nvrtc             = cuda-nvrtc%lib{nvrtc}
+import cublas            = libcublas%lib{cublas}
+import cublasLt          = libcublas%lib{cublasLt}
+import nvblas            = libcublas%lib{nvblas}
+import nvvm              = libnvvm%lib{nvvm}
+import nvinfer           = libtensorrt%lib{nvinfer}
+import nvinfer_dispatch  = libtensorrt%lib{nvinfer_dispatch}
+import nvinfer_lean      = libtensorrt%lib{nvinfer_lean}
+import nvinfer_plugin    = libtensorrt%lib{nvinfer_plugin}
+import nvinfer_vc_plugin = libtensorrt%lib{nvinfer_vc_plugin}
+import nvonnxparser      = libtensorrt%lib{nvonnxparser}
+import tensorrt_shim     = libtensorrt%lib{tensorrt_shim}
+
+./: exe{probe-cccl}:              cxx{cccl}              $cccl
+./: exe{probe-crt}:               cxx{crt}               $crt
+./: exe{probe-cudadevrt}:         cxx{cudadevrt}         $cudadevrt
+./: exe{probe-cudart}:            cxx{cudart}            $cudart
+./: exe{probe-nvcc}:              cxx{nvcc}              $nvcc
+./: exe{probe-nvrtc}:             cxx{nvrtc}             $nvrtc
+./: exe{probe-cublas}:            cxx{cublas}            $cublas
+./: exe{probe-cublasLt}:          cxx{cublasLt}          $cublasLt
+./: exe{probe-nvvm}:              cxx{nvvm}              $nvvm
+./: exe{probe-nvinfer}:           cxx{nvinfer}           $nvinfer
+./: exe{probe-nvinfer_dispatch}:  cxx{nvinfer_dispatch}  $nvinfer_dispatch
+./: exe{probe-nvinfer_lean}:      cxx{nvinfer_lean}      $nvinfer_lean
+./: exe{probe-nvinfer_vc_plugin}: cxx{nvinfer_vc_plugin} $nvinfer_vc_plugin
+
+# These three need another library of their own package on the link line:
+# nvblas forwards to cublas, and the two tensorrt libraries call into the
+# runtime. Neither package exports those as interface dependencies.
+#
+./: exe{probe-nvblas}:         cxx{nvblas}         $nvblas         $cublas
+./: exe{probe-nvinfer_plugin}: cxx{nvinfer_plugin} $nvinfer_plugin $nvinfer
+./: exe{probe-nvonnxparser}:   cxx{nvonnxparser}   $nvonnxparser   $nvinfer
+
+# tensorrt_shim is built on Linux only. The declaration stays in the graph on
+# both platforms so the source still reaches the distribution.
+#
+exe{probe-tensorrt_shim}: cxx{tensorrt_shim} $tensorrt_shim
+./: exe{probe-tensorrt_shim}: include = ($cxx.target.class != 'windows')
+
+exe{probe-*}: test = true
