@@ -1,0 +1,15 @@
+# lib{}, not libs{}: cudart is static on Windows, so libs{cudart} does not
+# resolve. libtensorrt exports only cudart as an interface dependency, so
+# nvinfer has to be named alongside nvinfer_plugin.
+#
+import libs  = cuda-cudart%lib{cudart}
+import libs += libtensorrt%lib{nvinfer}
+import libs += libtensorrt%lib{nvinfer_plugin}
+
+./: exe{tensorrt-inference}: {hxx ixx txx cxx}{**} $libs
+
+# Print the report rather than capture it: the examples are meant to be read.
+#
+exe{tensorrt-inference}: test = true
+
+cxx.poptions =+ "-I$out_root" "-I$src_root"

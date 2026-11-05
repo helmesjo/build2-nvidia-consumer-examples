@@ -1,0 +1,5 @@
+embedded-kernel
+
+# Testscript output directory (can be symlink).
+#
+test-embedded-kernel
