@@ -1,6 +1,6 @@
 # lib{}, not libs{}: cudart is static on Windows, so libs{cudart} does not
-# resolve. libtensorrt exports only cudart as an interface dependency, so
-# nvinfer has to be named alongside nvinfer_plugin.
+# resolve. nvinfer_plugin already brings nvinfer and cudart along, but the
+# example calls both directly, so it imports them itself.
 #
 import libs  = cuda-cudart%lib{cudart}
 import libs += libtensorrt%lib{nvinfer}

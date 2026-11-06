@@ -37,13 +37,16 @@ import tensorrt_shim     = libtensorrt%lib{tensorrt_shim}
 ./: exe{probe-nvinfer_lean}:      cxx{nvinfer_lean}      $nvinfer_lean
 ./: exe{probe-nvinfer_vc_plugin}: cxx{nvinfer_vc_plugin} $nvinfer_vc_plugin
 
-# These three need another library of their own package on the link line:
-# nvblas forwards to cublas, and the two tensorrt libraries call into the
-# runtime. Neither package exports those as interface dependencies.
+# nvinfer_plugin brings nvinfer along as an interface dependency.
 #
-./: exe{probe-nvblas}:         cxx{nvblas}         $nvblas         $cublas
-./: exe{probe-nvinfer_plugin}: cxx{nvinfer_plugin} $nvinfer_plugin $nvinfer
-./: exe{probe-nvonnxparser}:   cxx{nvonnxparser}   $nvonnxparser   $nvinfer
+./: exe{probe-nvinfer_plugin}: cxx{nvinfer_plugin} $nvinfer_plugin
+
+# These two need another library of their own package on the link line:
+# nvblas forwards to cublas and nvonnxparser calls into nvinfer, but neither
+# package declares that dependency.
+#
+./: exe{probe-nvblas}:       cxx{nvblas}       $nvblas       $cublas
+./: exe{probe-nvonnxparser}: cxx{nvonnxparser} $nvonnxparser $nvinfer
 
 # tensorrt_shim is built on Linux only. The declaration stays in the graph on
 # both platforms so the source still reaches the distribution.
