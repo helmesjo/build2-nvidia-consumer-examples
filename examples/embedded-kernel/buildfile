@@ -15,6 +15,12 @@ import bin2c = cuda-nvcc%exe{bin2c}
 #
 exe{embedded-kernel}: test = true
 
+# The driver API stub, cuda.lib, is built against the static CRT and asks for
+# LIBCMT, while everything else here uses the DLL CRT.
+#
+if ($cxx.class == 'msvc')
+  exe{embedded-kernel}: cxx.loptions += /NODEFAULTLIB:LIBCMT
+
 # A .cu is not a cxx{} source. Keeping it out of the cxx target type is what
 # leaves it to the recipe below.
 #
