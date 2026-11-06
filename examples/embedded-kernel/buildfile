@@ -36,13 +36,18 @@ file{kernel.fatbin}: cu{kernel} libue{meta} $nvcc
   # nvcc mishandles backslash paths on Windows.
   #
   poptions = $regex.apply($lib_poptions, '\\', '/')
+  ccbin    = $regex.replace($effect($cxx.path), '\\', '/')
 
   # all-major rather than native, so the fatbin builds with no GPU present.
   # It holds one cubin per major architecture, and a cubin loads on any device
   # of the same major with an equal or higher minor. Embedding PTX instead
   # would need a driver at least as new as this nvcc to JIT it.
   #
-  $nvcc -x cu --fatbin -arch=all-major -allow-unsupported-compiler \
+  # The host compiler is the configured one rather than whatever is first on
+  # PATH. nvcc rejects host compilers newer than it knows of, such as GCC 16.
+  #
+  $nvcc -x cu --fatbin -arch=all-major \
+        -ccbin $ccbin -allow-unsupported-compiler \
         $poptions -o $path($>) $path($<[0])
 }}
 
