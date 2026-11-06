@@ -15,5 +15,5 @@ test.target = $cxx.target
 # preprocessor. The package cannot export this itself, so every MSVC consumer
 # of cuda-cccl has to add it.
 #
-if ($cxx.target.class == 'windows')
+if ($cxx.class == 'msvc')
   cxx.coptions += /Zc:preprocessor
