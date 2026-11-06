@@ -53,5 +53,3 @@ import tensorrt_shim     = libtensorrt%lib{tensorrt_shim}
 #
 exe{probe-tensorrt_shim}: cxx{tensorrt_shim} $tensorrt_shim
 ./: exe{probe-tensorrt_shim}: include = ($cxx.target.class != 'windows')
-
-exe{probe-*}: test = true
